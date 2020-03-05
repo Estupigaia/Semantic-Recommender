@@ -7,6 +7,9 @@
 # BlueJ files
 *.ctxt
 
+#bin files
+*.bin
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
@@ -16,6 +19,7 @@
 *.nar
 *.ear
 *.zip
+*.gz
 *.tar.gz
 *.rar
 

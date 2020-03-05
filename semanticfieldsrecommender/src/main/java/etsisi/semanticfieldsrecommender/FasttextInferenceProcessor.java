@@ -3,42 +3,40 @@ package etsisi.semanticfieldsrecommender;
 import java.util.ArrayList;
 import java.io.File;
 import java.util.Iterator;
+import etsisi.utilities.MongoConnection;
 
 import com.mayabot.blas.Vector;
 import com.mayabot.mynlp.fasttext.FastText;
 
 public class FasttextInferenceProcessor extends InferenceProcessor {
 	
-	public static final File ROMANIAN = new File("fasttext/cc.ro.300.bin");
-	public static final File GERMAN = new File("fasttext/cc.de.300.bin");
 	public static final File ENGLISH = new File("fasttext/cc.en.300.bin");
 	public static final File SPANISH = new File("fasttext/cc.es.300.bin");
 	
 	private FastText fastText;
 	
-	public FasttextInferenceProcessor(File language) throws Exception{
-		super();
+	public FasttextInferenceProcessor(File language, MongoConnection mongo) throws Exception{
+		super(mongo);
 		this.fastText = FastText.loadFasttextBinModel(language);
 	}
 	
 	
 	@Override
-	public ArrayList<String> inferTags(ArrayList<Tag> tags){
-		ArrayList<String> inferredInterests = new ArrayList<String>();
-		ArrayList<Tag> databaseTags = new ArrayList<Tag>(); //TODO Retrieve tags from database
-		Iterator<Tag> tagIt = tags.iterator();
+	public ArrayList<String> inferTags(ArrayList<String> tags){
+		ArrayList<String> inferredTags = new ArrayList<String>();
+		ArrayList<String> databaseTags = new ArrayList<String>(); //TODO Retrieve tags from database
+		Iterator<String> tagIt = tags.iterator();
 		while(tagIt.hasNext()) {
-			Tag currentTag = tagIt.next();
-			String inferredInterest = this.applyInference(currentTag, databaseTags);
-			if(inferredInterest != null && !inferredInterests.contains(inferredInterest)) {
-				inferredInterests.add(inferredInterest);
-				databaseTags.add(new Tag(inferredInterest));
+			String currentTag = tagIt.next();
+			String inferredTag = this.applyInference(currentTag, databaseTags);
+			if(inferredTag != null && !inferredTags.contains(inferredTag)) {
+				inferredTags.add(inferredTag);
+				databaseTags.add(inferredTag);
 			}
 		}
-		return inferredInterests;
+		return inferredTags;
 	}
 	
-	//TODO Replace with a simple comparison of the words
 	@Override
 	public double compareTagSets(ArrayList<String> tagSet0, ArrayList<String> tagSet1) {
 		ArrayList<Double> similarityVector = new ArrayList<Double>();
@@ -63,12 +61,6 @@ public class FasttextInferenceProcessor extends InferenceProcessor {
 		language = language.toLowerCase().trim();
 		try {
 			switch(language) {
-				case InferenceProcessor.ROMANIAN:
-					this.fastText = FastText.loadFasttextBinModel(FasttextInferenceProcessor.ROMANIAN);
-					break;
-				case InferenceProcessor.GERMAN:
-					this.fastText = FastText.loadFasttextBinModel(FasttextInferenceProcessor.GERMAN);
-					break;
 				case InferenceProcessor.SPANISH:
 					this.fastText = FastText.loadFasttextBinModel(FasttextInferenceProcessor.SPANISH);
 					break;
@@ -80,23 +72,23 @@ public class FasttextInferenceProcessor extends InferenceProcessor {
 		}
 	}
 	
-	private String applyInference(Tag interest, ArrayList<Tag> ontologyTags) {
-		String interestNorm = interest.getName().toLowerCase().trim();
-		String inferredInterest = interestNorm;
-		Vector interestVector = this.fastText.getWordVector(interestNorm);
-		Iterator<Tag> ontologyTagIt = ontologyTags.iterator();
+	private String applyInference(String tag, ArrayList<String> databaseTags) {
+		String tagNorm = tag.toLowerCase().trim();
+		String inferredTag = tagNorm;;
+		Vector interestVector = this.fastText.getWordVector(tagNorm);
+		Iterator<String> databaseTagIt = databaseTags.iterator();
 		boolean foundSemanticField = false;
-		while(ontologyTagIt.hasNext() && !foundSemanticField) {
-			Tag currentTag = ontologyTagIt.next();
-			String currentTagString = currentTag.getName().toLowerCase().trim();
+		while(databaseTagIt.hasNext() && !foundSemanticField) {
+			String currentTag = databaseTagIt.next();
+			String currentTagString = currentTag.toLowerCase().trim();
 			Vector currentTagVector = this.fastText.getWordVector(currentTagString);
 			double dist = (double) Vector.Companion.cosine(currentTagVector, interestVector);
 			if(dist < 0.5D) {
-				inferredInterest = currentTagString;
+				inferredTag = currentTagString;
 				foundSemanticField = true;
 			}
 		}
-		return inferredInterest;
+		return inferredTag;
 	}
 	
 }
