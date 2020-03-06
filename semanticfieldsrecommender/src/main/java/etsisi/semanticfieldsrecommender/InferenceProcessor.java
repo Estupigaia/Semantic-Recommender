@@ -17,4 +17,5 @@ public abstract class InferenceProcessor {
 	//For item ranking
 	public abstract double compareTagSets(ArrayList<String> tagSet0, ArrayList<String> tagSet1);
 	public abstract void setLanguage(String language);
+	protected abstract String applyInference(String tag, ArrayList<String> databaseTags);
 }

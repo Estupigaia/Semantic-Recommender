@@ -1,7 +1,6 @@
 package etsisi.semanticfieldsrecommender;
 
 import java.util.ArrayList;
-import java.io.File;
 import java.util.Iterator;
 import etsisi.utilities.MongoConnection;
 
@@ -10,14 +9,11 @@ import com.mayabot.mynlp.fasttext.FastText;
 
 public class FasttextInferenceProcessor extends InferenceProcessor {
 	
-	public static final File ENGLISH = new File("fasttext/cc.en.300.bin");
-	public static final File SPANISH = new File("fasttext/cc.es.300.bin");
-	
 	private FastText fastText;
 	
-	public FasttextInferenceProcessor(File language, MongoConnection mongo) throws Exception{
+	public FasttextInferenceProcessor(String languageModel, MongoConnection mongo) throws Exception{
 		super(mongo);
-		this.fastText = FastText.loadFasttextBinModel(language);
+		this.fastText = FastText.loadFasttextBinModel(languageModel);
 	}
 	
 	
@@ -72,7 +68,8 @@ public class FasttextInferenceProcessor extends InferenceProcessor {
 		}
 	}
 	
-	private String applyInference(String tag, ArrayList<String> databaseTags) {
+	@Override
+	protected String applyInference(String tag, ArrayList<String> databaseTags) {
 		String tagNorm = tag.toLowerCase().trim();
 		String inferredTag = tagNorm;;
 		Vector interestVector = this.fastText.getWordVector(tagNorm);

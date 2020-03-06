@@ -1,6 +1,5 @@
 package etsisi.semanticfieldsrecommender;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -19,10 +18,12 @@ public class Item {
 	private MongoConnection mongo;
 	private InferenceProcessor ip;
 	
-	public Item(MongoConnection mongo, File language, ArrayList<String> tags) {
+	public Item(String _id, MongoConnection mongo, String language, ArrayList<String> tags,
+			InferenceProcessor ip) {
 		try {
+			this._id = _id;
 			this.mongo = mongo;
-			this.ip = new FasttextInferenceProcessor(language, mongo);
+			this.ip = ip;
 			this.setTags(tags);
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -73,7 +74,16 @@ public class Item {
 	
 	//TODO Parse item into Json
 	public void insertItem() {
-		this.mongo.insertDocument("Items", new JSONObject());
+		this.mongo.insertDocument("Items", this.parseToJson());
+	}
+	
+	private JSONObject parseToJson() {
+		JSONObject parsedItem = new JSONObject();
+		JSONObject _id = new JSONObject();
+		_id.put("$oid", this.get_id());
+		parsedItem.put("_id", _id);
+		parsedItem.put("tags", this.getTags());
+		return parsedItem;
 	}
 	
 	@Override
