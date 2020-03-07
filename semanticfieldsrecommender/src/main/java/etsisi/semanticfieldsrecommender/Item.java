@@ -3,40 +3,33 @@ package etsisi.semanticfieldsrecommender;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import org.json.JSONObject;
-
-import etsisi.utilities.MongoConnection;
-
 public class Item {
-	private String _id;
+	private String name;
 	private float rating;
 	private ArrayList<String> tags;
 	private String language;
 	
 	private double orderScore; //Score from comparison, only used for the comparator
 	
-	private MongoConnection mongo;
 	private InferenceProcessor ip;
 	
-	public Item(String _id, MongoConnection mongo, String language, ArrayList<String> tags,
-			InferenceProcessor ip) {
+	public Item(String name, String language, ArrayList<String> tags, InferenceProcessor ip) {
 		try {
-			this._id = _id;
-			this.mongo = mongo;
+			this.name = name;
 			this.ip = ip;
 			this.setTags(tags);
 		}catch(Exception ex) {
 			ex.printStackTrace();
-			System.out.println("Fasttext model failed");
+			System.out.println("InferenceProcessor failed");
 		}
 	}
 	
-	public String get_id() {
-		return _id;
+	public String getName() {
+		return name;
 	}
 	
-	public void set_id(String _id) {
-		this._id = _id;
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	public String getLanguage() {
@@ -72,20 +65,6 @@ public class Item {
 		this.orderScore = orderScore;
 	}
 	
-	//TODO Parse item into Json
-	public void insertItem() {
-		this.mongo.insertDocument("Items", this.parseToJson());
-	}
-	
-	private JSONObject parseToJson() {
-		JSONObject parsedItem = new JSONObject();
-		JSONObject _id = new JSONObject();
-		_id.put("$oid", this.get_id());
-		parsedItem.put("_id", _id);
-		parsedItem.put("tags", this.getTags());
-		return parsedItem;
-	}
-	
 	@Override
 	public boolean equals(Object o) {
 		if( o == this)
@@ -93,11 +72,11 @@ public class Item {
 		if( !(o instanceof Item))
 			return false;
 		Item document = (Item) o;
-		return this.get_id().equals(document.get_id());
+		return this.getName().equals(document.getName());
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.get_id());
+		return Objects.hash(this.getName());
 	}
 }

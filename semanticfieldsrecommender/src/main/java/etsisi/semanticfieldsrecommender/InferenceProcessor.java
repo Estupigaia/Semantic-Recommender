@@ -1,16 +1,15 @@
 package etsisi.semanticfieldsrecommender;
 
-import etsisi.utilities.MongoConnection;
 import java.util.ArrayList;
 
 public abstract class InferenceProcessor {
 	protected final static String SPANISH = "spanish";
 	protected final static String ENGLISH = "english";
 	
-	protected MongoConnection mongo;
+	protected RecomManager recomManager;
 	
-	public InferenceProcessor(MongoConnection mongo) {
-		this.mongo = mongo;
+	public InferenceProcessor(RecomManager recomManager) {
+		this.recomManager = recomManager;
 	}
 	
 	public abstract ArrayList<String> inferTags(ArrayList<String> tags);

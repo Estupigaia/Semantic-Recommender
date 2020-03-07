@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.json.JSONObject;
 
 import com.mongodb.client.MongoClient;
@@ -12,6 +13,9 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+
+import static com.mongodb.client.model.Filters.*;
 
 public class MongoConnection {
 	private static MongoConnection mongoConnection;
@@ -127,14 +131,38 @@ public class MongoConnection {
 		return jsonCollection;
 	}
 	
-	public JSONObject getFirstDocument(String collection) {
+	public JSONObject getFirstDocument(String collectionName) {
 		return documentToJson(this.getClient().getDatabase(
-				this.getDbName()).getCollection(collection).find().first());
+				this.getDbName()).getCollection(collectionName).find().first());
 	}
 	
-	public JSONObject getLastDocument(String collection) {
+	public JSONObject getLastDocument(String collectionName) {
 		return documentToJson(this.getClient().getDatabase(
-				this.getDbName()).getCollection(collection).find().sort(new Document("_id", -1)).first());
+				this.getDbName()).getCollection(collectionName).find().sort(new Document("_id", -1)).first());
+	}
+	
+	public boolean checkExistenceOneKey(String collectionName, String key, String value) {
+		return (this.getClient().getDatabase(
+				this.getDbName()).getCollection(collectionName).find(eq(key, value)).first()) != null;
+	}
+	
+	public boolean checkExistenceFilter(String collectionName, Bson filter) {
+		MongoCursor<Document> iterator = 
+				this.getClient().getDatabase(
+						this.getDbName()).getCollection(collectionName).find(filter).iterator();
+		if(iterator.hasNext())
+			return true;
+		return false;
+	}
+	
+	public ArrayList<JSONObject> getDocumentWithFilter(String collectionName, Bson filter) {
+		ArrayList<JSONObject> documents = new ArrayList<JSONObject>();
+		MongoCursor<Document> iterator = 
+				this.getClient().getDatabase(
+						this.getDbName()).getCollection(collectionName).find(filter).iterator();
+		while(iterator.hasNext())
+			documents.add(this.documentToJson(iterator.next()));
+		return documents;
 	}
 	
 	public void insertDocument(String collectionName, JSONObject jsonDocument) {
@@ -143,7 +171,9 @@ public class MongoConnection {
 	}
 	
 	private JSONObject documentToJson(Document document) {
-		return new JSONObject(document.toJson());
+		if(document != null)
+			return new JSONObject(document.toJson());
+		return new JSONObject();
 	}
 	
 	private MongoCollection<Document> getMongoCollection(String collectionName){

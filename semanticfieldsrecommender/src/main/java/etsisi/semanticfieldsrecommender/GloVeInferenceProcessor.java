@@ -10,16 +10,15 @@ import de.jungblut.distance.CosineDistance;
 import de.jungblut.glove.GloveRandomAccessReader;
 import de.jungblut.glove.impl.GloveBinaryRandomAccessReader;
 import de.jungblut.math.DoubleVector;
-import etsisi.utilities.MongoConnection;
 
 public class GloVeInferenceProcessor extends InferenceProcessor{
 	
 	private GloveRandomAccessReader db;
 	
-	public GloVeInferenceProcessor(MongoConnection mongo, String language) throws IOException{
-		super(mongo);
+	public GloVeInferenceProcessor(String modelPath, RecomManager recomManager) throws IOException{
+		super(recomManager);
 		try {
-			this.db = new GloveBinaryRandomAccessReader(Paths.get(language));
+			this.db = new GloveBinaryRandomAccessReader(Paths.get(modelPath));
 		}catch(IOException ex) {
 			ex.printStackTrace();
 		}
@@ -28,7 +27,7 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	@Override
 	public ArrayList<String> inferTags(ArrayList<String> tags){
 		ArrayList<String> inferredTags = new ArrayList<String>();
-		ArrayList<String> databaseTags = new ArrayList<String>(); //TODO Retrieve tags from database
+		ArrayList<String> databaseTags = this.recomManager.getDatabaseTags(); //TODO Retrieve tags from database
 		Iterator<String> tagIt = tags.iterator();
 		while(tagIt.hasNext()) {
 			String currentTag = tagIt.next();
@@ -78,8 +77,13 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	}
 	
 	@Override
-	public void setLanguage(String language) {
-		//GloVeInferenceProcessor only has one language
+	public void setLanguage(String modelPath) {
+		try {
+			this.db = new GloveBinaryRandomAccessReader(Paths.get(modelPath));
+		}catch(IOException ex) {
+			ex.printStackTrace();
+			System.out.println("Can't find model path provided");
+		}
 	}
 	
 	@Override
@@ -97,7 +101,7 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	private String findSemanticField (String tagNorm, ArrayList<String> databaseTags) throws IOException {
 		String inferredTag = tagNorm;
 		if(db.contains(tagNorm)) {
-			DoubleVector interestVector = db.get(tagNorm);
+			DoubleVector tagVector = db.get(tagNorm);
 			Iterator<String> databaseTagIt = databaseTags.iterator();
 			CosineDistance cos = new CosineDistance();
 			Double smallestDistance = Double.MAX_VALUE; 
@@ -106,7 +110,7 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 				String currentTagString = currentTag.toLowerCase().trim();
 				if (db.contains(currentTagString)) {
 					DoubleVector currentTagVector = db.get(currentTagString);
-					double dist = cos.measureDistance(currentTagVector, interestVector);
+					double dist = cos.measureDistance(currentTagVector, tagVector);
 					if( dist < 0.5d && dist < smallestDistance) {
 						inferredTag = currentTagString;
 						smallestDistance = dist;

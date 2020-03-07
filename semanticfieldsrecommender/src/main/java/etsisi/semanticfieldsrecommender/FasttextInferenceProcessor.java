@@ -2,7 +2,6 @@ package etsisi.semanticfieldsrecommender;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import etsisi.utilities.MongoConnection;
 
 import com.mayabot.blas.Vector;
 import com.mayabot.mynlp.fasttext.FastText;
@@ -11,8 +10,8 @@ public class FasttextInferenceProcessor extends InferenceProcessor {
 	
 	private FastText fastText;
 	
-	public FasttextInferenceProcessor(String languageModel, MongoConnection mongo) throws Exception{
-		super(mongo);
+	public FasttextInferenceProcessor(String languageModel, RecomManager recomManager) throws Exception{
+		super(recomManager);
 		this.fastText = FastText.loadFasttextBinModel(languageModel);
 	}
 	
