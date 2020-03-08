@@ -5,10 +5,7 @@ import java.util.Objects;
 
 public class Item {
 	private String name;
-	private float rating;
 	private ArrayList<String> tags;
-	
-	private double orderScore; //Score from comparison, only used for the comparator
 	
 	public Item(String name, ArrayList<String> tags) {
 		this.name = name;
@@ -22,14 +19,6 @@ public class Item {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public float getRating() {
-		return rating;
-	}
-	
-	public void setRating(float rating) {
-		this.rating = rating;
-	}
 	
 	public ArrayList<String> getTags() {
 		return tags;
@@ -39,13 +28,6 @@ public class Item {
 		this.tags = tags;
 	}
 	
-	public double getOrderScore() {
-		return this.orderScore;
-	}
-	
-	public void setOrderScore(double orderScore) {
-		this.orderScore = orderScore;
-	}
 	
 	@Override
 	public boolean equals(Object o) {
@@ -53,8 +35,8 @@ public class Item {
 			return true;
 		if( !(o instanceof Item))
 			return false;
-		Item document = (Item) o;
-		return this.getName().equals(document.getName());
+		Item item = (Item) o;
+		return this.getName().equals(item.getName());
 	}
 	
 	@Override
