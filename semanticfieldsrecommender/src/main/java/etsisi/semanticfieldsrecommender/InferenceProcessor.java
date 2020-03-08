@@ -2,6 +2,8 @@ package etsisi.semanticfieldsrecommender;
 
 import java.util.ArrayList;
 
+import etsisi.utilities.RecomManager;
+
 public abstract class InferenceProcessor {
 	protected final static String SPANISH = "spanish";
 	protected final static String ENGLISH = "english";

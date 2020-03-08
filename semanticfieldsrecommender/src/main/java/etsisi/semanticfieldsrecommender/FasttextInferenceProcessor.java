@@ -6,6 +6,8 @@ import java.util.Iterator;
 import com.mayabot.blas.Vector;
 import com.mayabot.mynlp.fasttext.FastText;
 
+import etsisi.utilities.RecomManager;
+
 public class FasttextInferenceProcessor extends InferenceProcessor {
 	
 	private FastText fastText;

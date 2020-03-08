@@ -10,6 +10,7 @@ import de.jungblut.distance.CosineDistance;
 import de.jungblut.glove.GloveRandomAccessReader;
 import de.jungblut.glove.impl.GloveBinaryRandomAccessReader;
 import de.jungblut.math.DoubleVector;
+import etsisi.utilities.RecomManager;
 
 public class GloVeInferenceProcessor extends InferenceProcessor{
 	
