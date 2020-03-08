@@ -1,6 +1,10 @@
 package etsisi.utilities;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -58,7 +62,7 @@ public class RecomManager {
 			this.insertTag(tag);
 	}
 	
-	public ArrayList<Item> predictRecommendations(Item item){
+	public ArrayList<Item> predictRecommendations(Item item, InferenceProcessor ip){
 		ArrayList<Item> recommendations = new ArrayList<Item>();
 		ArrayList<Bson> filters = new ArrayList<Bson>();
 		for(String tag : item.getTags())
@@ -66,7 +70,24 @@ public class RecomManager {
 		ArrayList<JSONObject> similarItemsJsons = mongo.getDocumentWithFilter("items", or(filters));
 		for(JSONObject itemJson : similarItemsJsons)
 			recommendations.add(this.parseJsonItem(itemJson));
-		return recommendations;
+		recommendations.remove(item); //Remove the item for which to predict recommendations, as it may appear
+		return this.rankRecommendations(recommendations, item, ip);
+	}
+	
+	private ArrayList<Item> rankRecommendations(ArrayList<Item> recommendations, Item item,
+			InferenceProcessor ip){
+		LinkedHashMap<Item, Double> itemsWithScores = new LinkedHashMap<Item, Double>();
+		for(Item recomItem : recommendations) {
+			itemsWithScores.put(recomItem, ip.compareTagSets(item.getTags(), recomItem.getTags()));
+		}
+		ArrayList<Map.Entry<Item, Double>> sortedEntries = new ArrayList<>(itemsWithScores.entrySet());
+		Collections.sort(sortedEntries, 
+				(entry0, entry1) -> Double.compare(entry0.getValue(), entry1.getValue()));
+		Collections.reverse(sortedEntries);
+		ArrayList<Item> sortedRecommendations = new ArrayList<Item>();
+		for(Entry<Item, Double> entry : sortedEntries)
+			sortedRecommendations.add(entry.getKey());
+		return sortedRecommendations;
 	}
 	
 	private JSONObject setObjectId(JSONObject json) {
