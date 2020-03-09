@@ -12,8 +12,7 @@ public class FasttextInferenceProcessor extends InferenceProcessor {
 	
 	public FasttextInferenceProcessor(String languageModel) throws Exception{
 		this.fastText = FastText.loadFasttextBinModel(languageModel);
-	}
-	
+	}	
 	
 	@Override
 	public ArrayList<String> inferTags(ArrayList<String> tags, ArrayList<String> databaseTags){

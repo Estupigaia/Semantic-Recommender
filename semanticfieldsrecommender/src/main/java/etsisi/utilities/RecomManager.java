@@ -90,7 +90,7 @@ public class RecomManager {
 			InferenceProcessor ip){
 		LinkedHashMap<Item, Double> itemsWithScores = new LinkedHashMap<Item, Double>();
 		for(Item recomItem : recommendations) {
-			itemsWithScores.put(recomItem, ip.compareTagSets(item.getTags(), recomItem.getTags()));
+			itemsWithScores.put(recomItem, ip.altCompareTagSets(item.getTags(), recomItem.getTags()));
 		}
 		ArrayList<Map.Entry<Item, Double>> sortedEntries = new ArrayList<>(itemsWithScores.entrySet());
 		Collections.sort(sortedEntries, 
