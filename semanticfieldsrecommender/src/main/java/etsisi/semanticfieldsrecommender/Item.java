@@ -6,10 +6,17 @@ import java.util.Objects;
 public class Item {
 	private String name;
 	private ArrayList<String> tags;
+	private String text;
 	
 	public Item(String name, ArrayList<String> tags) {
 		this.name = name;
-		this.setTags(tags);
+		this.tags = tags;
+	}
+	
+	public Item(String name, ArrayList<String> tags, String text) {
+		this.name = name;
+		this.tags = tags;
+		this.text = text;
 	}
 	
 	public String getName() {
@@ -28,7 +35,18 @@ public class Item {
 		this.tags = tags;
 	}
 	
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
 	
+	public boolean hasText() {
+		return this.text != null;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if( o == this)

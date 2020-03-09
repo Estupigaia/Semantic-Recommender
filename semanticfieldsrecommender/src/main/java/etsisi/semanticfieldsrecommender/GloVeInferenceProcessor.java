@@ -28,7 +28,7 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	@Override
 	public ArrayList<String> inferTags(ArrayList<String> tags){
 		ArrayList<String> inferredTags = new ArrayList<String>();
-		ArrayList<String> databaseTags = this.recomManager.getDatabaseTags(); //TODO Retrieve tags from database
+		ArrayList<String> databaseTags = this.recomManager.getDatabaseTags();
 		Iterator<String> tagIt = tags.iterator();
 		while(tagIt.hasNext()) {
 			String currentTag = tagIt.next();

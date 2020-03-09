@@ -42,6 +42,17 @@ public class RecomManager {
 		return databaseItems;
 	}
 	
+	public ArrayList<String> getDatabaseTexts(){
+		ArrayList<String> databaseTexts = new ArrayList<String>();
+		ArrayList<JSONObject> databaseJsons = mongo.getCollection("items");
+		for(JSONObject itemJson : databaseJsons) {
+			String text = itemJson.optString("text", "");
+			if(!text.equals(""))
+				databaseTexts.add(text);
+		}
+		return databaseTexts;
+	}
+	
 	public void insertTag(String tag) {
 		JSONObject parsedTag = new JSONObject();
 		parsedTag.put("name", tag);
@@ -100,10 +111,13 @@ public class RecomManager {
 	private Item parseJsonItem(JSONObject itemJson) {
 		JSONArray tagsJson = itemJson.optJSONArray("tags");
 		ArrayList<String> tags = new ArrayList<String>();
-		if(tags != null) {
+		if(tagsJson != null) {
 			for(Object tagObject : tagsJson)
 				tags.add((String) tagObject);
 		}
-		return new Item(itemJson.optString("name", ""), tags);
+		String text = itemJson.optString("text", "");
+		if(text.equals(""))
+			return new Item(itemJson.optString("name", ""), tags);
+		return new Item(itemJson.optString("name", ""), tags, text);
 	}
 }
