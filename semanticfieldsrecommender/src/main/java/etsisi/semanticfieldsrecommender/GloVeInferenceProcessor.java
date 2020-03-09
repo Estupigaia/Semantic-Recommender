@@ -10,14 +10,12 @@ import de.jungblut.distance.CosineDistance;
 import de.jungblut.glove.GloveRandomAccessReader;
 import de.jungblut.glove.impl.GloveBinaryRandomAccessReader;
 import de.jungblut.math.DoubleVector;
-import etsisi.utilities.RecomManager;
 
 public class GloVeInferenceProcessor extends InferenceProcessor{
 	
 	private GloveRandomAccessReader db;
 	
-	public GloVeInferenceProcessor(String modelPath, RecomManager recomManager) throws IOException{
-		super(recomManager);
+	public GloVeInferenceProcessor(String modelPath) throws IOException{
 		try {
 			this.db = new GloveBinaryRandomAccessReader(Paths.get(modelPath));
 		}catch(IOException ex) {
@@ -26,9 +24,8 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	}
 	
 	@Override
-	public ArrayList<String> inferTags(ArrayList<String> tags){
+	public ArrayList<String> inferTags(ArrayList<String> tags, ArrayList<String> databaseTags){
 		ArrayList<String> inferredTags = new ArrayList<String>();
-		ArrayList<String> databaseTags = this.recomManager.getDatabaseTags();
 		Iterator<String> tagIt = tags.iterator();
 		while(tagIt.hasNext()) {
 			String currentTag = tagIt.next();
@@ -41,8 +38,9 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 		return inferredTags;
 	}
 	
+	//Method that gives a similarity value between 0 and 1, more is better
 	@Override
-	public double compareTagSets(ArrayList<String> tagSet0, ArrayList<String> tagSet1) { //Method that gives a similarity value between 0 and 1, more is better
+	public double compareTagSets(ArrayList<String> tagSet0, ArrayList<String> tagSet1) { 
 		ArrayList<Double> similarityVector = new ArrayList<Double>();
 		CosineDistance cos = new CosineDistance();
 		try {
@@ -74,7 +72,7 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 			avg += similarity;
 		if(similarityVector.size() > 0)
 			avg = avg / similarityVector.size();
-		return 1 - avg.doubleValue();
+		return  avg.doubleValue();
 	}
 	
 	@Override

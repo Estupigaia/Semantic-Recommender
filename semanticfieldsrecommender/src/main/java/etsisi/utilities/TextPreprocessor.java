@@ -1,8 +1,8 @@
 package etsisi.utilities;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class TextPreprocessor {
 		this.config = config;
 	}
 	
-	public List<String> preprocessedText(String text){
+	public ArrayList<String> preprocessedText(String text){
 		String[] wordArray = text.replaceAll("\\p{P}", "").toLowerCase().split("\\s+"); //Deletes punctuation and splits
 		ArrayList<String> wordList = new ArrayList<String>(Arrays.asList(wordArray));
 		wordList = this.removeStopWords(wordList);
@@ -61,8 +61,53 @@ public class TextPreprocessor {
 		}
 	}
 	
-	//TODO perform TF-IDF and return keywords with weighting
-	private Map<String, Double> tfIdf(ArrayList<String> wordList, ArrayList<String> databaseTexts){
-		return new LinkedHashMap<String, Double>();
+	public ArrayList<String> extractKeywords(ArrayList<String> wordList, ArrayList<String> databaseTexts,
+			int keywordMaxSize){
+		LinkedHashMap<String, Double> termsWithScores = new LinkedHashMap<String, Double>();
+		for(String term : wordList)
+			termsWithScores.put(term, this.tfIdf(wordList, databaseTexts, term));
+		ArrayList<Map.Entry<String, Double>> sortedEntries = new ArrayList<>(termsWithScores.entrySet());
+		Collections.sort(sortedEntries, 
+				(entry0, entry1) -> Double.compare(entry0.getValue(), entry1.getValue()));
+		Collections.reverse(sortedEntries);
+		ArrayList<String> keywords = new ArrayList<String>();
+		Iterator<Map.Entry<String, Double>> entriesIt = sortedEntries.iterator();
+		int keywordCount = 0;
+		while(entriesIt.hasNext() && keywordCount < keywordMaxSize) {
+			keywords.add(entriesIt.next().getKey());
+			keywordCount++;
+		}
+		return keywords;
+	}
+	
+	public Double tfIdf(ArrayList<String> documentWordList, ArrayList<String> databaseTexts, String term) {
+		ArrayList<ArrayList<String>> preprocessedTexts = new ArrayList<ArrayList<String>>();
+		for(String databaseText : databaseTexts)
+			preprocessedTexts.add(new ArrayList<String>(this.preprocessedText(databaseText)));
+		Double tf = this.termFrequency(documentWordList, term);
+		Double idf = this.inverseDFrequency(preprocessedTexts, term);
+		return tf*idf;
+	}
+	
+	private Double termFrequency(ArrayList<String> wordList, String term) {
+		Double termCount = 0d;
+		for(String word : wordList)
+			if(word.equals(term))
+				termCount++;
+		return termCount/wordList.size();
+	}
+	
+	private Double inverseDFrequency(ArrayList<ArrayList<String>> itemTexts, String term) {
+		Double termCount = 0d;
+		for(ArrayList<String> wordList : itemTexts)
+			for(String word : wordList)
+				if(word.equals(term)) {
+					termCount++;
+					break;
+				}
+		//Avoids the unlikely case in which the checked term doesn't exist
+		if(termCount == 0d)
+			return 0d;
+		return Math.log10(itemTexts.size()/termCount);
 	}
 }

@@ -6,22 +6,18 @@ import java.util.Iterator;
 import com.mayabot.blas.Vector;
 import com.mayabot.mynlp.fasttext.FastText;
 
-import etsisi.utilities.RecomManager;
-
 public class FasttextInferenceProcessor extends InferenceProcessor {
 	
 	private FastText fastText;
 	
-	public FasttextInferenceProcessor(String languageModel, RecomManager recomManager) throws Exception{
-		super(recomManager);
+	public FasttextInferenceProcessor(String languageModel) throws Exception{
 		this.fastText = FastText.loadFasttextBinModel(languageModel);
 	}
 	
 	
 	@Override
-	public ArrayList<String> inferTags(ArrayList<String> tags){
+	public ArrayList<String> inferTags(ArrayList<String> tags, ArrayList<String> databaseTags){
 		ArrayList<String> inferredTags = new ArrayList<String>();
-		ArrayList<String> databaseTags = new ArrayList<String>(); //TODO Retrieve tags from database
 		Iterator<String> tagIt = tags.iterator();
 		while(tagIt.hasNext()) {
 			String currentTag = tagIt.next();

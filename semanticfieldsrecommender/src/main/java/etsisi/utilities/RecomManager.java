@@ -37,7 +37,7 @@ public class RecomManager {
 		ArrayList<JSONObject> databaseJsons = mongo.getCollection("items");
 		for(JSONObject itemJson : databaseJsons) {
 			Item item = this.parseJsonItem(itemJson);
-			item.setTags(ip.inferTags(item.getTags()));
+			item.setTags(ip.inferTags(item.getTags(), this.getDatabaseTags()));
 		}
 		return databaseItems;
 	}
@@ -63,10 +63,11 @@ public class RecomManager {
 	}
 	
 	public void insertItem(Item item, InferenceProcessor ip) {
-		item.setTags(ip.inferTags(item.getTags()));
+		item.setTags(ip.inferTags(item.getTags(), this.getDatabaseTags()));
 		JSONObject parsedItem = new JSONObject();
 		parsedItem.put("name", item.getName());
 		parsedItem.put("tags", item.getTags());
+		parsedItem.putOpt("text", item.getText());
 		parsedItem = this.setObjectId(parsedItem);
 		mongo.insertDocument("items", parsedItem);
 		for(String tag : item.getTags())
