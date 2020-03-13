@@ -57,7 +57,7 @@ public class RecomManager {
 		JSONObject parsedTag = new JSONObject();
 		parsedTag.put("name", tag);
 		parsedTag = this.setObjectId(parsedTag);
-		if(!mongo.checkExistenceOneKey("tags", "name", tag)) { //Avoid duplicates
+		if(!mongo.checkExistenceFilter("tags", eq("name", tag))) { //Avoid duplicates
 			mongo.insertDocument("tags", parsedTag);
 		}
 	}

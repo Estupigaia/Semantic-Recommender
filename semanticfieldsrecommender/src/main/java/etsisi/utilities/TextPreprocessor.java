@@ -1,7 +1,6 @@
 package etsisi.utilities;
 
 import java.util.Map;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -11,6 +10,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.stream.Stream;
+import eus.ixa.ixa.pipe.lemma.StatisticalLemmatizer;
+import eus.ixa.ixa.pipe.pos.StatisticalTagger;
 
 public class TextPreprocessor {
 	public static final String SPANISH = "spanish";
@@ -40,9 +41,9 @@ public class TextPreprocessor {
 		this.config = config;
 	}
 	
-	public ArrayList<String> preprocessedText(String text){
-		String[] wordArray = text.replaceAll("\\p{P}", "").toLowerCase().split("\\s+"); //Deletes punctuation and splits
-		ArrayList<String> wordList = new ArrayList<String>(Arrays.asList(wordArray));
+	public ArrayList<String> preprocessText(String text){
+		String[] tokens = text.replaceAll("\\p{P}", "").toLowerCase().split("\\s+"); //Deletes punctuation and splits
+		ArrayList<String> wordList = this.lemmatizeText(tokens);
 		wordList = this.removeStopWords(wordList);
 		return wordList;
 	}
@@ -61,8 +62,9 @@ public class TextPreprocessor {
 		}
 	}
 	
-	public ArrayList<String> extractKeywords(ArrayList<String> wordList, ArrayList<String> databaseTexts,
+	public ArrayList<String> extractKeywords(String text, ArrayList<String> databaseTexts,
 			int keywordMaxSize){
+		ArrayList<String> wordList = this.preprocessText(text);
 		LinkedHashMap<String, Double> termsWithScores = new LinkedHashMap<String, Double>();
 		for(String term : wordList)
 			termsWithScores.put(term, this.tfIdf(wordList, databaseTexts, term));
@@ -83,7 +85,7 @@ public class TextPreprocessor {
 	public Double tfIdf(ArrayList<String> documentWordList, ArrayList<String> databaseTexts, String term) {
 		ArrayList<ArrayList<String>> preprocessedTexts = new ArrayList<ArrayList<String>>();
 		for(String databaseText : databaseTexts)
-			preprocessedTexts.add(new ArrayList<String>(this.preprocessedText(databaseText)));
+			preprocessedTexts.add(new ArrayList<String>(this.preprocessText(databaseText)));
 		Double tf = this.termFrequency(documentWordList, term);
 		Double idf = this.inverseDFrequency(preprocessedTexts, term);
 		return tf*idf;
@@ -109,5 +111,27 @@ public class TextPreprocessor {
 		if(termCount == 0d)
 			return 0d;
 		return Math.log10(itemTexts.size()/termCount);
+	}
+	
+	public ArrayList<String> lemmatizeText(String[] tokens){
+		ArrayList<String> lemmatizedText = new ArrayList<String>();
+		String language = this.language == "spanish" ? "es" : "en";
+		Properties lemmaProps = new Properties();
+		lemmaProps.setProperty("language", language);
+		lemmaProps.setProperty("lemmatizerModel", this.getConfig().getProperty(this.language + "lemma"));
+		lemmaProps.setProperty("useModelCache", "true");
+		StatisticalLemmatizer lemmatizer = new StatisticalLemmatizer(lemmaProps);
+		lemmatizedText = new ArrayList<String>(lemmatizer.lemmatize(tokens, tokens));
+		return lemmatizedText;
+	}
+	
+	public String[] tagText(String[] tokens) {
+		String language = this.language == "spanish" ? "es" : "en";
+		Properties taggerProps = new Properties();
+		taggerProps.setProperty("language", language);
+		taggerProps.setProperty("model", this.getConfig().getProperty(this.language + "pos"));
+		taggerProps.setProperty("useModelCache", "true");
+		StatisticalTagger tagger = new StatisticalTagger(taggerProps);
+		return  tagger.posAnnotate(tokens).toArray(tokens);
 	}
 }

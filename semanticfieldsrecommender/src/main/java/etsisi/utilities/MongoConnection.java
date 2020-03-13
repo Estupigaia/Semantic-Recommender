@@ -15,8 +15,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
-import static com.mongodb.client.model.Filters.*;
-
 public class MongoConnection {
 	private static MongoConnection mongoConnection;
 	
@@ -139,11 +137,6 @@ public class MongoConnection {
 	public JSONObject getLastDocument(String collectionName) {
 		return documentToJson(this.getClient().getDatabase(
 				this.getDbName()).getCollection(collectionName).find().sort(new Document("_id", -1)).first());
-	}
-	
-	public boolean checkExistenceOneKey(String collectionName, String key, String value) {
-		return (this.getClient().getDatabase(
-				this.getDbName()).getCollection(collectionName).find(eq(key, value)).first()) != null;
 	}
 	
 	public boolean checkExistenceFilter(String collectionName, Bson filter) {
