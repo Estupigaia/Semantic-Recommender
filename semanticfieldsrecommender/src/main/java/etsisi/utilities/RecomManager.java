@@ -3,6 +3,7 @@ package etsisi.utilities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -24,17 +25,17 @@ public class RecomManager {
 		this.mongo = mongo;
 	}
 	
-	public ArrayList<String> getDatabaseTags() {
-		ArrayList<String> databaseTags = new ArrayList<String>();
-		ArrayList<JSONObject> tagObjects = mongo.getCollection("tags");
+	public List<String> getDatabaseTags() {
+		List<String> databaseTags = new ArrayList<String>();
+		List<JSONObject> tagObjects = mongo.getCollection("tags");
 		for(JSONObject tagJson : tagObjects)
 			databaseTags.add(tagJson.getString("name"));
 		return databaseTags;
 	}
 	
-	public ArrayList<Item> getDatabaseItems(InferenceProcessor ip){
-		ArrayList<Item> databaseItems = new ArrayList<Item>();
-		ArrayList<JSONObject> databaseJsons = mongo.getCollection("items");
+	public List<Item> getDatabaseItems(InferenceProcessor ip){
+		List<Item> databaseItems = new ArrayList<Item>();
+		List<JSONObject> databaseJsons = mongo.getCollection("items");
 		for(JSONObject itemJson : databaseJsons) {
 			Item item = this.parseJsonItem(itemJson);
 			item.setTags(ip.inferTags(item.getTags(), this.getDatabaseTags()));
@@ -42,9 +43,9 @@ public class RecomManager {
 		return databaseItems;
 	}
 	
-	public ArrayList<String> getDatabaseTexts(){
-		ArrayList<String> databaseTexts = new ArrayList<String>();
-		ArrayList<JSONObject> databaseJsons = mongo.getCollection("items");
+	public List<String> getDatabaseTexts(){
+		List<String> databaseTexts = new ArrayList<String>();
+		List<JSONObject> databaseJsons = mongo.getCollection("items");
 		for(JSONObject itemJson : databaseJsons) {
 			String text = itemJson.optString("text", "");
 			if(!text.equals(""))
@@ -74,29 +75,29 @@ public class RecomManager {
 			this.insertTag(tag);
 	}
 	
-	public ArrayList<Item> predictRecommendations(Item item, InferenceProcessor ip){
-		ArrayList<Item> recommendations = new ArrayList<Item>();
-		ArrayList<Bson> filters = new ArrayList<Bson>();
+	public List<Item> predictRecommendations(Item item, InferenceProcessor ip){
+		List<Item> recommendations = new ArrayList<Item>();
+		List<Bson> filters = new ArrayList<Bson>();
 		for(String tag : item.getTags())
 			filters.add(eq("tags",tag));
-		ArrayList<JSONObject> similarItemsJsons = mongo.getDocumentWithFilter("items", or(filters));
+		List<JSONObject> similarItemsJsons = mongo.getDocumentWithFilter("items", or(filters));
 		for(JSONObject itemJson : similarItemsJsons)
 			recommendations.add(this.parseJsonItem(itemJson));
 		recommendations.remove(item); //Remove the item for which to predict recommendations, as it may appear
 		return this.rankRecommendations(recommendations, item, ip);
 	}
 	
-	private ArrayList<Item> rankRecommendations(ArrayList<Item> recommendations, Item item,
+	private List<Item> rankRecommendations(List<Item> recommendations, Item item,
 			InferenceProcessor ip){
 		LinkedHashMap<Item, Double> itemsWithScores = new LinkedHashMap<Item, Double>();
 		for(Item recomItem : recommendations) {
 			itemsWithScores.put(recomItem, ip.altCompareTagSets(item.getTags(), recomItem.getTags()));
 		}
-		ArrayList<Map.Entry<Item, Double>> sortedEntries = new ArrayList<>(itemsWithScores.entrySet());
+		List<Map.Entry<Item, Double>> sortedEntries = new ArrayList<>(itemsWithScores.entrySet());
 		Collections.sort(sortedEntries, 
 				(entry0, entry1) -> Double.compare(entry0.getValue(), entry1.getValue()));
 		Collections.reverse(sortedEntries);
-		ArrayList<Item> sortedRecommendations = new ArrayList<Item>();
+		List<Item> sortedRecommendations = new ArrayList<Item>();
 		for(Entry<Item, Double> entry : sortedEntries)
 			sortedRecommendations.add(entry.getKey());
 		return sortedRecommendations;
@@ -111,7 +112,7 @@ public class RecomManager {
 	
 	private Item parseJsonItem(JSONObject itemJson) {
 		JSONArray tagsJson = itemJson.optJSONArray("tags");
-		ArrayList<String> tags = new ArrayList<String>();
+		List<String> tags = new ArrayList<String>();
 		if(tagsJson != null) {
 			for(Object tagObject : tagsJson)
 				tags.add((String) tagObject);

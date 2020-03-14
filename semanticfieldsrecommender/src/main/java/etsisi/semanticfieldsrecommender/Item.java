@@ -1,19 +1,19 @@
 package etsisi.semanticfieldsrecommender;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Item {
 	private String name;
-	private ArrayList<String> tags;
+	private List<String> tags;
 	private String text;
 	
-	public Item(String name, ArrayList<String> tags) {
+	public Item(String name, List<String> tags) {
 		this.name = name;
 		this.tags = tags;
 	}
 	
-	public Item(String name, ArrayList<String> tags, String text) {
+	public Item(String name, List<String> tags, String text) {
 		this.name = name;
 		this.tags = tags;
 		this.text = text;
@@ -27,11 +27,11 @@ public class Item {
 		this.name = name;
 	}
 	
-	public ArrayList<String> getTags() {
+	public List<String> getTags() {
 		return tags;
 	}
 	
-	public void setTags(ArrayList<String> tags) {
+	public void setTags(List<String> tags) {
 		this.tags = tags;
 	}
 	

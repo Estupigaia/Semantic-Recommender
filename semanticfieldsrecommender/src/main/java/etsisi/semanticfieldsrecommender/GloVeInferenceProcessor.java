@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import de.jungblut.distance.CosineDistance;
 import de.jungblut.glove.GloveRandomAccessReader;
@@ -24,8 +25,8 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	}
 	
 	@Override
-	public ArrayList<String> inferTags(ArrayList<String> tags, ArrayList<String> databaseTags){
-		ArrayList<String> inferredTags = new ArrayList<String>();
+	public List<String> inferTags(List<String> tags, List<String> databaseTags){
+		List<String> inferredTags = new ArrayList<String>();
 		Iterator<String> tagIt = tags.iterator();
 		while(tagIt.hasNext()) {
 			String currentTag = tagIt.next();
@@ -40,8 +41,8 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	
 	//Method that gives a similarity value between 0 and 1, more is better
 	@Override
-	public double compareTagSets(ArrayList<String> tagSet0, ArrayList<String> tagSet1) { 
-		ArrayList<Double> similarityVector = new ArrayList<Double>();
+	public double compareTagSets(List<String> tagSet0, List<String> tagSet1) { 
+		List<Double> similarityVector = new ArrayList<Double>();
 		CosineDistance cos = new CosineDistance();
 		try {
 			if(tagSet0 != null && tagSet1 != null) {
@@ -86,7 +87,7 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	}
 	
 	@Override
-	protected String applyInference(String tag, ArrayList<String> databaseTags) {
+	protected String applyInference(String tag, List<String> databaseTags) {
 		String tagNorm = tag.toLowerCase().trim();
 		try {
 			return this.findSemanticField(tagNorm, databaseTags);
@@ -97,7 +98,7 @@ public class GloVeInferenceProcessor extends InferenceProcessor{
 	}
 	
 	//Finds the closest semantic field, if any
-	private String findSemanticField (String tagNorm, ArrayList<String> databaseTags) throws IOException {
+	private String findSemanticField (String tagNorm, List<String> databaseTags) throws IOException {
 		String inferredTag = tagNorm;
 		if(db.contains(tagNorm)) {
 			DoubleVector tagVector = db.get(tagNorm);

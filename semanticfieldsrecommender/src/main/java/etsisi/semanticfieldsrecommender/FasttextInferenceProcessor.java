@@ -2,6 +2,7 @@ package etsisi.semanticfieldsrecommender;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import com.mayabot.blas.Vector;
 import com.mayabot.mynlp.fasttext.FastText;
@@ -15,8 +16,8 @@ public class FasttextInferenceProcessor extends InferenceProcessor {
 	}	
 	
 	@Override
-	public ArrayList<String> inferTags(ArrayList<String> tags, ArrayList<String> databaseTags){
-		ArrayList<String> inferredTags = new ArrayList<String>();
+	public List<String> inferTags(List<String> tags, List<String> databaseTags){
+		List<String> inferredTags = new ArrayList<String>();
 		Iterator<String> tagIt = tags.iterator();
 		while(tagIt.hasNext()) {
 			String currentTag = tagIt.next();
@@ -30,7 +31,7 @@ public class FasttextInferenceProcessor extends InferenceProcessor {
 	}
 	
 	@Override
-	public double compareTagSets(ArrayList<String> tagSet0, ArrayList<String> tagSet1) {
+	public double compareTagSets(List<String> tagSet0, List<String> tagSet1) {
 		ArrayList<Double> similarityVector = new ArrayList<Double>();
 		for(String tag0 : tagSet0) {
 			Vector tag0Vec = this.fastText.getWordVector(tag0);
@@ -65,7 +66,7 @@ public class FasttextInferenceProcessor extends InferenceProcessor {
 	}
 	
 	@Override
-	protected String applyInference(String tag, ArrayList<String> databaseTags) {
+	protected String applyInference(String tag, List<String> databaseTags) {
 		String tagNorm = tag.toLowerCase().trim();
 		String inferredTag = tagNorm;;
 		Vector interestVector = this.fastText.getWordVector(tagNorm);

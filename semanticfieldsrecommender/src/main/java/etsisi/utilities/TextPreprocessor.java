@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -41,14 +42,14 @@ public class TextPreprocessor {
 		this.config = config;
 	}
 	
-	public ArrayList<String> preprocessText(String text){
+	public List<String> preprocessText(String text){
 		String[] tokens = text.replaceAll("\\p{P}", "").toLowerCase().split("\\s+"); //Deletes punctuation and splits
-		ArrayList<String> wordList = this.lemmatizeText(tokens);
+		List<String> wordList = this.lemmatizeText(tokens);
 		wordList = this.removeStopWords(wordList);
 		return wordList;
 	}
 	
-	private ArrayList<String> removeStopWords(ArrayList<String> wordList) {
+	private List<String> removeStopWords(List<String> wordList) {
 		try (Stream<String> stream = Files.lines(Paths.get(
 				this.config.getProperty(this.language + "stopwords", "")))) {
 	        Iterator<String> stopwordIt = stream.iterator();
@@ -62,17 +63,17 @@ public class TextPreprocessor {
 		}
 	}
 	
-	public ArrayList<String> extractKeywords(String text, ArrayList<String> databaseTexts,
+	public List<String> extractKeywords(String text, List<String> databaseTexts,
 			int keywordMaxSize){
-		ArrayList<String> wordList = this.preprocessText(text);
+		List<String> wordList = this.preprocessText(text);
 		LinkedHashMap<String, Double> termsWithScores = new LinkedHashMap<String, Double>();
 		for(String term : wordList)
 			termsWithScores.put(term, this.tfIdf(wordList, databaseTexts, term));
-		ArrayList<Map.Entry<String, Double>> sortedEntries = new ArrayList<>(termsWithScores.entrySet());
+		List<Map.Entry<String, Double>> sortedEntries = new ArrayList<>(termsWithScores.entrySet());
 		Collections.sort(sortedEntries, 
 				(entry0, entry1) -> Double.compare(entry0.getValue(), entry1.getValue()));
 		Collections.reverse(sortedEntries);
-		ArrayList<String> keywords = new ArrayList<String>();
+		List<String> keywords = new ArrayList<String>();
 		Iterator<Map.Entry<String, Double>> entriesIt = sortedEntries.iterator();
 		int keywordCount = 0;
 		while(entriesIt.hasNext() && keywordCount < keywordMaxSize) {
@@ -82,8 +83,8 @@ public class TextPreprocessor {
 		return keywords;
 	}
 	
-	public Double tfIdf(ArrayList<String> documentWordList, ArrayList<String> databaseTexts, String term) {
-		ArrayList<ArrayList<String>> preprocessedTexts = new ArrayList<ArrayList<String>>();
+	public Double tfIdf(List<String> documentWordList, List<String> databaseTexts, String term) {
+		List<ArrayList<String>> preprocessedTexts = new ArrayList<ArrayList<String>>();
 		for(String databaseText : databaseTexts)
 			preprocessedTexts.add(new ArrayList<String>(this.preprocessText(databaseText)));
 		Double tf = this.termFrequency(documentWordList, term);
@@ -91,7 +92,7 @@ public class TextPreprocessor {
 		return tf*idf;
 	}
 	
-	private Double termFrequency(ArrayList<String> wordList, String term) {
+	private Double termFrequency(List<String> wordList, String term) {
 		Double termCount = 0d;
 		for(String word : wordList)
 			if(word.equals(term))
@@ -99,9 +100,9 @@ public class TextPreprocessor {
 		return termCount/wordList.size();
 	}
 	
-	private Double inverseDFrequency(ArrayList<ArrayList<String>> itemTexts, String term) {
+	private Double inverseDFrequency(List<ArrayList<String>> itemTexts, String term) {
 		Double termCount = 0d;
-		for(ArrayList<String> wordList : itemTexts)
+		for(List<String> wordList : itemTexts)
 			for(String word : wordList)
 				if(word.equals(term)) {
 					termCount++;
@@ -113,8 +114,8 @@ public class TextPreprocessor {
 		return Math.log10(itemTexts.size()/termCount);
 	}
 	
-	public ArrayList<String> lemmatizeText(String[] tokens){
-		ArrayList<String> lemmatizedText = new ArrayList<String>();
+	public List<String> lemmatizeText(String[] tokens){
+		List<String> lemmatizedText = new ArrayList<String>();
 		String language = this.language == "spanish" ? "es" : "en";
 		Properties lemmaProps = new Properties();
 		lemmaProps.setProperty("language", language);
@@ -125,13 +126,13 @@ public class TextPreprocessor {
 		return lemmatizedText;
 	}
 	
-	public String[] tagText(String[] tokens) {
+	public List<String> tagText(String[] tokens) {
 		String language = this.language == "spanish" ? "es" : "en";
 		Properties taggerProps = new Properties();
 		taggerProps.setProperty("language", language);
 		taggerProps.setProperty("model", this.getConfig().getProperty(this.language + "pos"));
 		taggerProps.setProperty("useModelCache", "true");
 		StatisticalTagger tagger = new StatisticalTagger(taggerProps);
-		return  tagger.posAnnotate(tokens).toArray(tokens);
+		return  tagger.posAnnotate(tokens);
 	}
 }

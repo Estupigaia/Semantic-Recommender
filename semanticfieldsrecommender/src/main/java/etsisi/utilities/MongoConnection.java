@@ -2,6 +2,7 @@ package etsisi.utilities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -121,8 +122,8 @@ public class MongoConnection {
 		this.dbName = dbName;
 	}
 	
-	public ArrayList<JSONObject> getCollection(String collectionName){
-		ArrayList<JSONObject> jsonCollection = new ArrayList<JSONObject>();
+	public List<JSONObject> getCollection(String collectionName){
+		List<JSONObject> jsonCollection = new ArrayList<JSONObject>();
 		for(Document document : this.getMongoCollection(collectionName).find()) {
 			jsonCollection.add(this.documentToJson(document));
 		}
@@ -148,8 +149,8 @@ public class MongoConnection {
 		return false;
 	}
 	
-	public ArrayList<JSONObject> getDocumentWithFilter(String collectionName, Bson filter) {
-		ArrayList<JSONObject> documents = new ArrayList<JSONObject>();
+	public List<JSONObject> getDocumentWithFilter(String collectionName, Bson filter) {
+		List<JSONObject> documents = new ArrayList<JSONObject>();
 		MongoCursor<Document> iterator = 
 				this.getClient().getDatabase(
 						this.getDbName()).getCollection(collectionName).find(filter).iterator();

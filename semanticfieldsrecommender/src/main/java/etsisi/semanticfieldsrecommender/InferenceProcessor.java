@@ -1,18 +1,18 @@
 package etsisi.semanticfieldsrecommender;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public abstract class InferenceProcessor {
 	protected final static String SPANISH = "spanish";
 	protected final static String ENGLISH = "english";
 	
-	public abstract ArrayList<String> inferTags(ArrayList<String> tags, ArrayList<String> databaseTags);
+	public abstract List<String> inferTags(List<String> tags, List<String> databaseTags);
 	//For item ranking
-	public abstract double compareTagSets(ArrayList<String> tagSet0, ArrayList<String> tagSet1);
+	public abstract double compareTagSets(List<String> tagSet0, List<String> tagSet1);
 	public abstract void setLanguage(String language);
-	protected abstract String applyInference(String tag, ArrayList<String> databaseTags);
+	protected abstract String applyInference(String tag, List<String> databaseTags);
 	
-	public double altCompareTagSets(ArrayList<String> tagSet0, ArrayList<String> tagSet1) {
+	public double altCompareTagSets(List<String> tagSet0, List<String> tagSet1) {
 		double simCount = 0;
 		for(String tag : tagSet0) {
 			if(tagSet1.contains(tag))
