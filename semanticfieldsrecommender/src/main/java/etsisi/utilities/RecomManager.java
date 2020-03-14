@@ -24,7 +24,15 @@ public class RecomManager {
 	public RecomManager(MongoConnection mongo) {
 		this.mongo = mongo;
 	}
-	
+
+	public MongoConnection getMongo() {
+		return mongo;
+	}
+
+	public void setMongo(MongoConnection mongo) {
+		this.mongo = mongo;
+	}
+
 	public List<String> getDatabaseTags() {
 		List<String> databaseTags = new ArrayList<String>();
 		List<JSONObject> tagObjects = mongo.getCollection("tags");
