@@ -83,7 +83,7 @@ public class RecomManager {
 			this.insertTag(tag);
 	}
 	
-	public List<Item> predictRecommendations(Item item, InferenceProcessor ip){
+	public List<Item> predictRecommendations(Item item, InferenceProcessor ip, boolean simpleComparator){
 		List<Item> recommendations = new ArrayList<Item>();
 		List<Bson> filters = new ArrayList<Bson>();
 		for(String tag : item.getTags())
@@ -92,15 +92,18 @@ public class RecomManager {
 		for(JSONObject itemJson : similarItemsJsons)
 			recommendations.add(this.parseJsonItem(itemJson));
 		recommendations.remove(item); //Remove the item for which to predict recommendations, as it may appear
-		return this.rankRecommendations(recommendations, item, ip);
+		return this.rankRecommendations(recommendations, item, ip, simpleComparator);
 	}
 	
 	private List<Item> rankRecommendations(List<Item> recommendations, Item item,
-			InferenceProcessor ip){
+			InferenceProcessor ip, boolean simpleComparator){
 		LinkedHashMap<Item, Double> itemsWithScores = new LinkedHashMap<Item, Double>();
-		for(Item recomItem : recommendations) {
-			itemsWithScores.put(recomItem, ip.altCompareTagSets(item.getTags(), recomItem.getTags()));
-		}
+		if(simpleComparator)
+			for(Item recomItem : recommendations)
+				itemsWithScores.put(recomItem, ip.altCompareTagSets(item.getTags(), recomItem.getTags()));
+		else
+			for(Item recomItem : recommendations)
+				itemsWithScores.put(recomItem, ip.compareTagSets(item.getTags(), recomItem.getTags()));
 		List<Map.Entry<Item, Double>> sortedEntries = new ArrayList<>(itemsWithScores.entrySet());
 		Collections.sort(sortedEntries, 
 				(entry0, entry1) -> Double.compare(entry0.getValue(), entry1.getValue()));
