@@ -2,7 +2,9 @@ package etsisi.semanticfieldsrecommender.experiments;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -35,10 +37,10 @@ public class CranReader {
 		}
 	}
 	
-	public static List<CranQuery> getQueries(File docsFile) {
+	public static List<CranQuery> getQueries(File queriesFile) {
 		List<CranQuery> cranQueries = new ArrayList<CranQuery>();
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(docsFile));
+			BufferedReader reader = new BufferedReader(new FileReader(queriesFile));
 			String line = reader.readLine();
 			while(line != null) {
 				if(line.contains(IDENTIFIER)) {
@@ -64,6 +66,34 @@ public class CranReader {
 		}catch(IOException ex) {
 			ex.printStackTrace();
 			return cranQueries;
+		}
+	}
+	
+	public static Map<Integer, List<Integer>> getRelations(File relationsFile) {
+		Map<Integer, List<Integer>> cranRelations = new LinkedHashMap<Integer, List<Integer>>();
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(relationsFile));
+			String line = reader.readLine();
+			while(line != null) {
+				String[] splitLine = line.split(" ");
+				Integer queryId = Integer.parseInt(splitLine[0]);
+				Integer rating = Integer.parseInt(splitLine[2]);
+				List<Integer> relatedDocs = new ArrayList<Integer>();
+				while(line != null && rating != -1) {
+					relatedDocs.add(Integer.parseInt(splitLine[1]));
+					line = reader.readLine();
+					splitLine = line.split(" ");
+					rating = Integer.parseInt(splitLine[2]);
+				}
+				cranRelations.put(queryId, relatedDocs);
+				if(line!=null)
+					line = reader.readLine();
+			}
+			reader.close();
+			return cranRelations;
+		}catch(IOException ex) {
+			ex.printStackTrace();
+			return cranRelations;
 		}
 	}
 	
